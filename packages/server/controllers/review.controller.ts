@@ -10,15 +10,23 @@ export const reviewController = {
          res.status(400).json({ error: 'invalid product id passed' });
          return;
       }
-
-      const reviews = await reviewService.getReviews(productId);
-      res.json(reviews);
+      const product = await productRepository.getProduct(productId);
+      if (!product) {
+         res.status(404).json({ error: 'product doesnt exists' });
+         return;
+      }
+      const reviews = await reviewRepository.getReviews(productId);
+      const summary = await reviewRepository.getReviewSummary(productId);
+      res.json({
+         summary,
+         reviews,
+      });
    },
 
    async summarizeReviews(req: Request, res: Response) {
       var productId = Number(req.params.id);
       if (isNaN(productId)) {
-         res.status(400).json({ error: 'invalid product id' });
+         res.status(404).json({ error: 'invalid product id' });
       }
       const product = await productRepository.getProduct(productId);
       if (!product) {

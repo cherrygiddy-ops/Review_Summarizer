@@ -29,10 +29,13 @@ const reviewRepository = {
          update: data,
       });
    },
-   async getReviewSummary(productId: number) {
-      return prisma.summary.findUnique({
-         where: { productId },
+   async getReviewSummary(productId: number): Promise<string | null> {
+      const summarry = await prisma.summary.findFirst({
+         where: {
+            AND: [{ productId }, { expiresAt: { gt: new Date() } }],
+         },
       });
+      return summarry ? summarry.content : null;
    },
 };
 
