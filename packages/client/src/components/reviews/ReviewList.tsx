@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import StartRatings from './StartRatings';
 import { HiSparkles } from 'react-icons/hi2';
 import Skeleton from 'react-loading-skeleton';
@@ -21,7 +21,12 @@ type ReviewResponse = {
    reviews: Review[];
    summary: string | null;
 };
+
+type SummaryResponse = {
+   summarry: string;
+};
 const ReviewList = ({ productId }: Props) => {
+   const [summary, setSummary] = useState('');
    const {
       data: reviewsData,
       isLoading,
@@ -37,9 +42,13 @@ const ReviewList = ({ productId }: Props) => {
       );
       return data;
    };
-   useEffect(() => {
-      fetchReviews();
-   }, []);
+
+   const handleSummary = async () => {
+      const { data } = await axios.post<SummaryResponse>(
+         `api.products/${productId}/reviews/summarize`
+      );
+      setSummary(data.summarry);
+   };
 
    if (isLoading)
       return (
@@ -56,13 +65,15 @@ const ReviewList = ({ productId }: Props) => {
    if (error) return <p className="text-red-500">{error.message}</p>;
 
    if (!reviewsData?.reviews.length) return null;
+
+   const currentSummary = reviewsData.summary || summary;
    return (
       <div>
          <div className="mb-5">
-            {reviewsData?.summary ? (
-               <p>{reviewsData.summary}</p>
+            {currentSummary ? (
+               <p>{currentSummary}</p>
             ) : (
-               <Button>
+               <Button onClick={handleSummary}>
                   <HiSparkles></HiSparkles>Summarize
                </Button>
             )}
