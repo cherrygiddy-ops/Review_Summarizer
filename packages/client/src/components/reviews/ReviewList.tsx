@@ -5,6 +5,7 @@ import { HiSparkles } from 'react-icons/hi2';
 import Skeleton from 'react-loading-skeleton';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
+import ReviewSkelton from './ReviewSkelton';
 interface Props {
    productId: number;
 }
@@ -27,6 +28,7 @@ type SummaryResponse = {
 };
 const ReviewList = ({ productId }: Props) => {
    const [summary, setSummary] = useState('');
+   const [isSummaryLoading, setSummaryLoading] = useState(false);
    const {
       data: reviewsData,
       isLoading,
@@ -44,21 +46,21 @@ const ReviewList = ({ productId }: Props) => {
    };
 
    const handleSummary = async () => {
+      setSummaryLoading(true);
+
       const { data } = await axios.post<SummaryResponse>(
          `api.products/${productId}/reviews/summarize`
       );
+
       setSummary(data.summarry);
+      setSummaryLoading(false);
    };
 
    if (isLoading)
       return (
          <div className="flex flex-col gap-5 ">
             {[1, 2, 3, 4].map((rev) => (
-               <div key={rev}>
-                  <Skeleton width={150}></Skeleton>
-                  <Skeleton width={100}></Skeleton>
-                  <Skeleton count={2}></Skeleton>
-               </div>
+               <ReviewSkelton key={rev}></ReviewSkelton>
             ))}
          </div>
       );
@@ -73,9 +75,20 @@ const ReviewList = ({ productId }: Props) => {
             {currentSummary ? (
                <p>{currentSummary}</p>
             ) : (
-               <Button onClick={handleSummary}>
-                  <HiSparkles></HiSparkles>Summarize
-               </Button>
+               <div>
+                  <Button
+                     onClick={handleSummary}
+                     className="cursor-pointer"
+                     disabled={isSummaryLoading}
+                  >
+                     <HiSparkles></HiSparkles>Summarize
+                  </Button>
+                  {isSummaryLoading && (
+                     <div className="py-3">
+                        <ReviewSkelton></ReviewSkelton>
+                     </div>
+                  )}
+               </div>
             )}
          </div>
          <div className="flex flex-col gap-5 ">
