@@ -1,52 +1,20 @@
-import axios from 'axios';
 import StartRatings from './StartRatings';
 import { HiSparkles } from 'react-icons/hi2';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
 import ReviewSkelton from './ReviewSkelton';
+import { reviewsApiClient } from './reviewsApi';
 interface Props {
    productId: number;
 }
-type Review = {
-   id: number;
-   author: string;
-   rating: number;
-   content: string;
-   createdAt: Date;
-   productId: number;
-};
-
-type ReviewResponse = {
-   reviews: Review[];
-   summary: string | null;
-};
-
-type SummaryResponse = {
-   summarry: string;
-};
 const ReviewList = ({ productId }: Props) => {
    const summaryMutations = useMutation({
-      mutationFn: () => summarizeReviews(),
+      mutationFn: () => reviewsApiClient.summarizeReviews(productId),
    });
    const reviewQuery = useQuery({
       queryKey: ['reviews', productId],
-      queryFn: () => fetchReviews(),
+      queryFn: () => reviewsApiClient.fetchReviews(productId),
    });
-
-   const fetchReviews = async () => {
-      const { data } = await axios.get<ReviewResponse>(
-         `/api/products/${productId}/reviews`
-      );
-      return data;
-   };
-
-   const summarizeReviews = async () => {
-      const { data } = await axios.post<SummaryResponse>(
-         `api.products/${productId}/reviews/summarize`
-      );
-      return data;
-   };
-
    if (reviewQuery.isLoading)
       return (
          <div className="flex flex-col gap-5 ">
