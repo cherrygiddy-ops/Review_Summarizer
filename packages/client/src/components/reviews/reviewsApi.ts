@@ -11,11 +11,11 @@ export type Review = {
 
 export type ReviewResponse = {
    reviews: Review[];
-   summary: string | null;
+   summary: string;
 };
 
 export type SummaryResponse = {
-   summarry: string;
+   summary: string;
 };
 
 export const reviewsApiClient = {
@@ -26,7 +26,7 @@ export const reviewsApiClient = {
    },
    summarizeReviews(productId: number) {
       return axios
-         .post<SummaryResponse>(`api.products/${productId}/reviews/summarize`)
+         .post<SummaryResponse>(`api/products/${productId}/reviews/summarize`)
          .then((res) => res.data);
    },
 };

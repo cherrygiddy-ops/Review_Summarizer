@@ -3,15 +3,23 @@ import { HiSparkles } from 'react-icons/hi2';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Button } from '../ui/button';
 import ReviewSkelton from './ReviewSkelton';
-import { reviewsApiClient } from './reviewsApi';
+import {
+   reviewsApiClient,
+   type ReviewResponse,
+   type SummaryResponse,
+} from './reviewsApi';
 interface Props {
    productId: number;
 }
+
 const ReviewList = ({ productId }: Props) => {
-   const summaryMutations = useMutation({
+   const summaryMutations = useMutation<SummaryResponse>({
       mutationFn: () => reviewsApiClient.summarizeReviews(productId),
+      onSuccess: () => {
+         reviewQuery.refetch();
+      },
    });
-   const reviewQuery = useQuery({
+   const reviewQuery = useQuery<ReviewResponse>({
       queryKey: ['reviews', productId],
       queryFn: () => reviewsApiClient.fetchReviews(productId),
    });
@@ -27,9 +35,7 @@ const ReviewList = ({ productId }: Props) => {
       return <p className="text-red-500">{reviewQuery.error.message}</p>;
 
    if (!reviewQuery.data?.reviews.length) return null;
-
-   const currentSummary =
-      reviewQuery.data.summary || summaryMutations.data?.summarry;
+   const currentSummary = reviewQuery.data?.summary;
    return (
       <div>
          <div className="mb-5">
